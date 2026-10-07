@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Le contenu web du jeu (dist/) est copié dans assets/www par `npm run android:sync`.
+def keystoreFile = rootProject.file('release.keystore')
+
+android {
+    namespace 'com.superessence.xalamonsters'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.superessence.xalamonsters'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword System.getenv('XALA_STORE_PASSWORD')
+                keyAlias System.getenv('XALA_KEY_ALIAS') ?: 'xalamonsters'
+                keyPassword System.getenv('XALA_KEY_PASSWORD')
+            }
+        }
+    }
+
+    flavorDimensions = ['store']
+    productFlavors {
+        // Version Play Store : Google Play Billing réel
+        play { dimension 'store' }
+        // APK de test autonome : magasin de test local, sans dépendance Play
+        standalone { dimension 'store'; applicationIdSuffix '.standalone'; versionNameSuffix '-standalone' }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            if (keystoreFile.exists()) signingConfig signingConfigs.release
+        }
+        debug {
+            applicationIdSuffix '.debug'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    androidResources {
+        // les fichiers web doivent rester tels quels (pas de compression des .js/.css inutiles)
+        noCompress += ['woff', 'woff2']
+        ignoreAssetsPattern '!.svn:!.git:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+}
+
+dependencies {
+    playImplementation 'com.android.billingclient:billing:7.1.1'
+}

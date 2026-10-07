@@ -11,7 +11,7 @@ import { html, esc, onActions, priceHtml, rewardInline, rarityChip, elChips } fr
 import { portrait, eggPortrait, Showcase } from '../../render/showcase';
 import { audio } from '../../audio/audio';
 import { StoreError, type StoreProvider, MockStore } from '../../platform/store';
-import { profileFor, type QualityLevel } from '../../platform/quality';
+import { profileFor, detectQuality, type QualityLevel } from '../../platform/quality';
 import { startBuild } from './buildings';
 import { skillsFor } from '../../data/skills';
 import type { GameState } from '../../core/types';
@@ -377,7 +377,7 @@ function openSettings(app: App): void {
         if (a === 'q') {
           const v = d.v as GameState['settings']['quality'];
           g.setSetting('quality', v);
-          app.setQuality(v === 'auto' ? (await import('../../platform/quality')).detectQuality() : (v as QualityLevel));
+          app.setQuality(v === 'auto' ? detectQuality() : (v as QualityLevel));
         }
         if (a === 'vib') g.setSetting('vibration', d.v === '1');
         if (a === 'fps') g.setSetting('showFps', d.v === '1');

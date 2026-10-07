@@ -108,7 +108,12 @@ export class AndroidStore implements StoreProvider {
   }
 
   static available(): boolean {
-    return typeof window !== 'undefined' && typeof window.XalaNative?.billingCall === 'function';
+    try {
+      const n = typeof window !== 'undefined' ? window.XalaNative : undefined;
+      return typeof n?.billingCall === 'function' && typeof n.billingAvailable === 'function' && !!(n.billingAvailable as () => boolean)();
+    } catch {
+      return false;
+    }
   }
 
   private call<T>(method: string, arg: unknown, timeoutMs = 120000): Promise<T> {

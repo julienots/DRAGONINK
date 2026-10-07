@@ -78,5 +78,11 @@ export function stars(n: number, max = 3): string {
 }
 
 export function vibrate(ms = 15): void {
-  try { navigator.vibrate?.(ms); } catch { /* ignore */ }
+  try {
+    const st = window.xala?.game.state.settings;
+    if (st && !st.vibration) return;
+    const n = window.XalaNative as { vibrate?: (ms: number) => void } | undefined;
+    if (n?.vibrate) n.vibrate(ms);
+    else navigator.vibrate?.(ms);
+  } catch { /* ignore */ }
 }
