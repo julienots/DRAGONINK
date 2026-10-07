@@ -1,0 +1,27 @@
+{
+  "name": "xalamonsters",
+  "version": "0.1.0",
+  "private": true,
+  "description": "XalaMonsters — jeu mobile de collection, élevage et combat de monstres (SUPERESSENCE)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "android:sync": "node tools/sync-android.mjs",
+    "android:apk": "npm run build && npm run android:sync && bash tools/android-offline/build-apk.sh"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}
