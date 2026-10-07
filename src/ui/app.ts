@@ -374,6 +374,7 @@ export class App {
   }
 
   setHudVisible(v: boolean): void {
+    this.world.markerLayer.style.visibility = v || !this.battleActive ? '' : 'hidden';
     for (const el of [this.hudEl, this.chipEl, this.sideL, this.sideR, this.trackerEl, this.navEl, this.ctxEl]) el.style.visibility = v ? '' : 'hidden';
   }
 

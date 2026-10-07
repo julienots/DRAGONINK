@@ -17,11 +17,16 @@ async function start(page: Page, fresh = true): Promise<void> {
 }
 
 async function closeAll(page: Page): Promise<void> {
-  for (let i = 0; i < 8; i++) {
-    const n = await page.locator('.sheet-close').count();
-    if (!n) break;
-    await page.locator('.sheet-close').last().click();
-    await page.waitForTimeout(150);
+  // certaines fenêtres s'ouvrent en différé (cadeau quotidien après l'accueil)
+  for (let round = 0; round < 3; round++) {
+    for (let i = 0; i < 8; i++) {
+      const n = await page.locator('.sheet-close').count();
+      if (!n) break;
+      await page.locator('.sheet-close').last().click();
+      await page.waitForTimeout(150);
+    }
+    await page.waitForTimeout(450);
+    if (!(await page.locator('.sheet-close').count())) break;
   }
 }
 
@@ -166,6 +171,8 @@ test('boss et arène', async ({ page }) => {
   await page.locator('[data-act=auto]').click();
   await expect(page.locator('.sheet h2').last()).toHaveText(/assaut/, { timeout: 90_000 });
   expect((await state(page)).boss.damage).toBeGreaterThan(0);
+  expect((await state(page)).boss.attempts).toBe(1);
+  await expect(page.locator('.battle-ui')).toHaveCount(1);
   await page.locator('.sheet [data-act=ok]').click();
   await page.locator('.sheet .tab', { hasText: 'Arène' }).click();
   await page.locator('.sheet [data-act=arena]').first().click();
@@ -189,6 +196,7 @@ test('boutique, achat intégré (test), double récompense impossible, restaurat
   await page.locator('.sheet [data-act=buy][data-id=iap_gems_80]').click();
   await page.locator('.sheet [data-act=yes]').click();
   await page.waitForFunction((g) => window.xala!.game.state.resources.gems === g + 80, gems);
+  await page.locator('.sheet [data-act=ok]').click();
   // rejouer le même reçu ne donne rien
   const again = await page.evaluate(() => { const s = window.xala!.game.state; const id = s.iap.processedOrders[0]; return window.xala!.game.act('iap.grant', { receipt: { orderId: id, sku: 'gems_80', purchaseToken: 'x', purchaseTime: Date.now(), source: 'mock' } }); });
   expect(again).toBe(false);
@@ -197,11 +205,13 @@ test('boutique, achat intégré (test), double récompense impossible, restaurat
   await page.locator('.sheet [data-act=buy][data-id=iap_cosmetic_aurora]').click();
   await page.locator('.sheet [data-act=yes]').click();
   await page.waitForFunction(() => window.xala!.game.state.unlocks.includes('skin_aurore_iap'));
+  await page.locator('.sheet [data-act=ok]').click();
   await page.evaluate(() => { const s = window.xala!.game.state; s.unlocks = []; s.iap.entitlements = []; });
   await page.locator('.sheet [data-act=restore]').click();
   await page.waitForFunction(() => window.xala!.game.state.unlocks.includes('skin_aurore_iap'));
   s = await state(page);
   expect(s.resources.gems).toBe(gems + 80);
+  expect(s.iap.processedOrders.length).toBe(2);
   expect(errors).toEqual([]);
 });
 

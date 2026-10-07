@@ -23,13 +23,24 @@ export function frag(s: string): DocumentFragment {
 }
 
 /** Délégation de clics : data-act="nom" + data-* → handler(nom, dataset). */
+const actionHandlers = new WeakMap<HTMLElement, (e: MouseEvent) => void>();
+
+/**
+ * Délégation de clics : data-act="nom" + data-* → handler(nom, dataset).
+ * Un seul gestionnaire par élément racine : un nouvel appel (rafraîchissement
+ * de panneau) remplace l'ancien au lieu de s'y ajouter.
+ */
 export function onActions(root: HTMLElement, handler: (act: string, data: DOMStringMap, el: HTMLElement) => void): void {
-  root.addEventListener('click', (e) => {
+  const prev = actionHandlers.get(root);
+  if (prev) root.removeEventListener('click', prev);
+  const listener = (e: MouseEvent) => {
     const t = (e.target as HTMLElement).closest('[data-act]') as HTMLElement | null;
     if (!t || !root.contains(t) || (t as HTMLButtonElement).disabled) return;
     e.stopPropagation();
     handler(t.dataset.act!, t.dataset, t);
-  });
+  };
+  actionHandlers.set(root, listener);
+  root.addEventListener('click', listener);
 }
 
 export const RES_ICON: Record<string, string> = { coins: '🪙', gems: '💎', energy: '⚡', essence: '🌟' };

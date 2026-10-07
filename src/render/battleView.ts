@@ -74,7 +74,8 @@ export class BattleView {
     this.camera.aspect = (c.clientWidth || 1) / (c.clientHeight || 1);
     // en portrait, on recule la caméra pour voir les deux équipes
     const portrait = this.camera.aspect < 1;
-    this.camera.position.set(0, portrait ? 11 : 7.5, portrait ? 15 : 11);
+    this.camera.fov = portrait ? 52 : 40;
+    this.camera.position.set(0, portrait ? 13 : 7.5, portrait ? 13.5 : 11);
     this.camera.lookAt(0, 0.8, 0);
     this.camera.updateProjectionMatrix();
   }
